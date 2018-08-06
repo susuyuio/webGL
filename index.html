@@ -45,7 +45,7 @@
         var squareVertexPositionBuffer;
         function initBuffers() {
             // 申请缓冲区，存储，提高重绘效率
-            triangleVertexPositionBuffer = gl.createBuffer;
+            triangleVertexPositionBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
             // 定义三角形的三个定点（z=0）
             var vertices = [
@@ -78,7 +78,7 @@
             }
             var str = shaderScript.text();
             var shader;
-            if (shaderScript[0].type === 'x-shader/x-frament') {
+            if (shaderScript[0].type === 'x-shader/x-fragment') {
                 shader = gl.createShader(gl.FRAGMENT_SHADER);
             } else if (shaderScript[0].type === 'x-shader/x-vertex') {
                 shader = gl.createShader(gl.VERTEX_SHADER);
@@ -95,7 +95,7 @@
         }
 
         var shaderProgram;
-        function initBuffers() {
+        function initShaders() {
             var fragmentShader = getShader(gl, 'shader-fs');
             var vertexShader = getShader(gl, 'shader-vs');
             shaderProgram = gl.createProgram();
