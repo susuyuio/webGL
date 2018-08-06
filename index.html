@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WebGL</title>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="./gl-matrix-min.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <canvas id="test01-canvas" width="800" height="600"></canvas>
+    <script>
+        $(document).ready(function () {
+            webGLStart();
+        });
+        function webGLStart() {
+            // 找到画布
+            var canvas = $("#test01-canvas")[0];
+            initGL(canvas);
+            initShaders();
+            initBuffers();
+
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.enable(gl.DEPTH_TEST);
+
+            drawScene();
+        }
+        var gl;
+        function initGL(canvas) {
+            try {
+                // 创建画笔，并绑定与画布的关系
+                gl = canvas.getContext("webgl") ||
+                    canvas.getContext("experimental-webgl");
+                gl.viewportWidth = canvas.width;
+                gl.viewportHeight = canvas.height;
+            } catch (e) { }
+            if (!gl) {
+                alert("无法初始化“WebGL”。");
+            }
+        }
+        var triangleVertexPositionBuffer;
+        var squareVertexPositionBuffer;
+        function initBuffers() {
+            // 申请缓冲区，存储，提高重绘效率
+            triangleVertexPositionBuffer = gl.createBuffer;
+            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+            // 定义三角形的三个定点（z=0）
+            var vertices = [
+                0.0, 1.0, 0.0,
+                -1.0, -1.0, 0.0,
+                1.0, -1.0, 0.0
+            ];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+            triangleVertexPositionBuffer.itemSize = 3;
+            triangleVertexPositionBuffer.numItems = 3;
+            // 正方形
+            squareVertexPositionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+            vertices = [
+                1.0, 1.0, 0.0,
+                -1.0, 1.0, 0.0,
+                1.0, -1.0, 0.0,
+                -1.0, -1.0, 0.0
+            ];
+            gl.bufferData(gl.ARRAY_BUFFER,
+                new Float32Array(vertices), gl.STATIC_DRAW);
+            squareVertexPositionBuffer.itemSize = 3;
+            squareVertexPositionBuffer.numItems = 4;
+        }
+
+        function getShader(gl, id) {
+            var shaderScript = $('#' + id);
+            if (!shaderScript.length) {
+                return null;
+            }
+            var str = shaderScript.text();
+            var shader;
+            if (shaderScript[0].type === 'x-shader/x-frament') {
+                shader = gl.createShader(gl.FRAGMENT_SHADER);
+            } else if (shaderScript[0].type === 'x-shader/x-vertex') {
+                shader = gl.createShader(gl.VERTEX_SHADER);
+            } else {
+                return null;
+            }
+            gl.shaderSource(shader, str);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                alert(gl.getShaderInfoLog(shader));
+                return null;
+            }
+            return shader;
+        }
+
+        var shaderProgram;
+        function initBuffers() {
+            var fragmentShader = getShader(gl, 'shader-fs');
+            var vertexShader = getShader(gl, 'shader-vs');
+            shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                alert('无法初始化\'Shader\'');
+            }
+            gl.useProgram(shaderProgram);
+        }
+    </script>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        void main(void){
+            gl_FragColor=vec4(1.0,1.0,1.0,1.0);
+        }
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        void main(void)
+        {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        }
+    </script>
+</body>
+
+</html>
